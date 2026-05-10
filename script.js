@@ -1,3 +1,8 @@
+document.getElementById('menu-toggle').addEventListener('click', function() {
+            const mobileMenu = document.getElementById('mobile-menu');
+            mobileMenu.classList.toggle('hidden');
+        });
+
 (function() {
             // ===== SHEET DATA FETCH =====
             // Purpose: Load product data from Google Sheet and render menu cards
