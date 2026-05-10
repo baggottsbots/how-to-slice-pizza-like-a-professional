@@ -3,6 +3,58 @@ document.getElementById('menu-toggle').addEventListener('click', function() {
             mobileMenu.classList.toggle('hidden');
         });
 
+async function loadMenuFromSheet() {
+            const loadingSkeleton = document.getElementById('loading-skeleton');
+            const menuError = document.getElementById('menu-error');
+            const sheetData = document.getElementById('sheet-data');
+
+            try {
+                // Replace with your actual Google Sheets CSV export URL
+                const sheetUrl = 'https://docs.google.com/spreadsheets/d/YOUR_SHEET_ID/export?format=csv';
+                const response = await fetch(sheetUrl);
+                
+                if (!response.ok) throw new Error('Failed to fetch sheet');
+                
+                const csv = await response.text();
+                const rows = csv.split('\n').slice(1).filter(row => row.trim());
+                
+                loadingSkeleton.classList.add('hidden');
+                sheetData.innerHTML = '';
+
+                rows.forEach((row, index) => {
+                    const [name, description, price, imageUrl] = row.split(',').map(cell => cell.trim().replace(/^"|"$/g, ''));
+                    
+                    if (name && price) {
+                        const menuItem = document.createElement('div');
+                        menuItem.className = 'menu-item menu-card';
+                        menuItem.style.animationDelay = `${index * 0.1}s`;
+                        
+                        menuItem.innerHTML = `
+                            <div class="menu-card-content">
+                                ${imageUrl ? `<img src="${imageUrl}" alt="${name}" class="w-full h-48 object-cover rounded-lg mb-4">` : ''}
+                                <h4 class="text-xl font-bold text-gray-900">${name}</h4>
+                                <p class="text-gray-600 text-sm mt-2">${description || ''}</p>
+                                <div class="menu-card-price">$${price}</div>
+                            </div>
+                        `;
+                        
+                        sheetData.appendChild(menuItem);
+                    }
+                });
+
+                if (sheetData.children.length === 0) {
+                    menuError.classList.remove('hidden');
+                }
+            } catch (error) {
+                console.error('Error loading menu:', error);
+                loadingSkeleton.classList.add('hidden');
+                menuError.classList.remove('hidden');
+            }
+        }
+
+        // Load menu when page loads
+        document.addEventListener('DOMContentLoaded', loadMenuFromSheet);
+
 (function() {
             // ===== SHEET DATA FETCH =====
             // Purpose: Load product data from Google Sheet and render menu cards
